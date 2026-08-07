@@ -53,12 +53,7 @@ class Task:
   def date(self, date):
     self._date = date
 
-  
-t = Task("Buy groceries")
-t1 = Task("Buy groceries", date="12/25/2026")
 
-print(t)
-print(t1)
 
 class TaskNotFoundError(Exception):
   pass
@@ -99,15 +94,47 @@ class TaskManager:
       print("Task doesn't exist!")                     
 
 
-taskmanager = TaskManager()
-taskmanager.add_task("Buy groceries")
-taskmanager.add_task("Buy groceries",  date="12/25/2026")
-print(taskmanager)
+def main():
+  quit = False
+  taskManager = TaskManager()
+  while(not quit):
+    try:
+      choice = int(input("\nWhat would you like to do: \n 1. Create task \n 2. View tasks \n 3. Delete Task \n 4. Complete task \n 5. Quit \n"))
+    except ValueError:
+      print("Please write a number from 1 to 5")
+      continue
+    match choice:
+      case 1:
+        taskName = input("Name of your task: ")
+        taskDescription = input("Description of task (optional) ")
+        taskDate = input("Choose a date ")
+        taskManager.add_task(title=taskName, description=taskDescription, date=taskDate)
+        print("Task created successfully! Going back to main menu.... \n")
+      case 2:
+        print(taskManager)
+      case 3:
+        try:
+          taskId = int(input("Provide ID of the task to remove: "))
+        except ValueError:
+          print("Invalid task ID, going back to main menu...")
+          continue
+        taskManager.delete_task(taskId)
+        print("Task deleted successfully! \n Going back to main menu.... \n")
+        
+      case 4:
+        try:
+          taskId = int(input("Provide ID of the task to mark as complete: "))
+        except ValueError:
+          print("Invalid task ID, going back to main menu...")
+          continue
+        taskManager.complete_task(taskId)
+        print("Task completed successfully!\n Going back to main menu.... \n")
+      case 5: 
+        quit = True
+      case _:
+        print("Invalid number, write a number from 1 to 5")
+        continue  
 
-taskmanager.complete_task(1)
-print(taskmanager)
 
-taskmanager.delete_task(2)
-print(taskmanager)
-
-taskmanager.complete_task(99)
+if __name__ == "__main__":
+  main()
