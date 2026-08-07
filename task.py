@@ -1,4 +1,5 @@
 import datetime
+import sys
 class Task:
  
   def __init__(self, title, description=" ", done=False, date=None):
@@ -55,7 +56,58 @@ class Task:
   
 t = Task("Buy groceries")
 t1 = Task("Buy groceries", date="12/25/2026")
-t2 = Task("Buy groceries", done="Yes")
+
 print(t)
 print(t1)
-print(t2)
+
+class TaskNotFoundError(Exception):
+  pass
+
+
+class TaskManager:
+  def __init__(self):
+    self.next_id = 1 
+    self.taskDict = {}
+
+  def __str__(self):
+    text = ""
+    for id,task in self.taskDict.items():
+      text += f"\nTask id: {id} - {task}"
+    return text
+  def add_task(self, title, description=" ", done=False, date=None):
+    t = Task(title, description, done, date)
+    self.taskDict[self.next_id] = t
+    self.next_id += 1
+
+  def complete_task(self, id):
+    try:
+      if id not in self.taskDict:
+        raise TaskNotFoundError("Task doesn't exist!")
+      else:
+        self.taskDict[id].done = True
+    except TaskNotFoundError:
+      print("Task doesn't exist!")
+
+      
+  def delete_task(self, id):
+    try:
+      if id not in self.taskDict:
+        raise TaskNotFoundError("Task doesn't exist!")
+      else:
+        self.taskDict.pop(id)
+    except TaskNotFoundError:
+      print("Task doesn't exist!")                     
+
+
+taskmanager = TaskManager()
+taskmanager.add_task("Buy groceries")
+taskmanager.add_task("Buy groceries",  date="12/25/2026")
+print(taskmanager)
+
+taskmanager.complete_task(1)
+print(taskmanager)
+
+taskmanager.delete_task(2)
+print(taskmanager)
+
+taskmanager.complete_task(99)
