@@ -1,5 +1,6 @@
 import datetime
-import sys
+import os
+import json
 class Task:
  
   def __init__(self, title, description=" ", done=False, date=None):
@@ -7,7 +8,7 @@ class Task:
       raise ValueError("Invalid title")
     self.title = title
     self.description = description
-    if date == None:
+    if date == None or date == "":
       x = datetime.datetime.now()
       self.date = x.strftime("%x")
     else:
@@ -53,6 +54,9 @@ class Task:
   def date(self, date):
     self._date = date
 
+  def to_dict(self):
+    return {"title": self.title, "description": self.description, "done": self.done,"date": self.date}
+
 
 
 class TaskNotFoundError(Exception):
@@ -91,12 +95,38 @@ class TaskManager:
       else:
         self.taskDict.pop(id)
     except TaskNotFoundError:
-      print("Task doesn't exist!")                     
+      print("Task doesn't exist!")     
+
+  def save(self):
+    saveDict = dict()
+    for id,task in self.taskDict.items():
+      saveDict[id] = task.to_dict()
+    with open('data.json', 'w', encoding='utf-8') as file:
+      json.dump(saveDict, file, ensure_ascii=False, indent=4)
+
+
+  def load(self):
+    json_file = "data.json"
+    if os.path.exists(json_file):
+      with open('data.json', 'r') as file:
+        data = json.load(file)
+        if data:
+          max_id = max(int(k) for k in data.keys())  
+          self.next_id = max_id + 1
+        else:
+          self.next_id = 1
+        for id in data:
+              task = Task(data[id]['title'], data[id]['description'],
+                            data[id]['done'], data[id]['date'])
+              self.taskDict[int(id)] = task
+    
+    
 
 
 def main():
   quit = False
   taskManager = TaskManager()
+  taskManager.load()
   while(not quit):
     try:
       choice = int(input("\nWhat would you like to do: \n 1. Create task \n 2. View tasks \n 3. Delete Task \n 4. Complete task \n 5. Quit \n"))
@@ -130,6 +160,7 @@ def main():
         taskManager.complete_task(taskId)
         print("Task completed successfully!\n Going back to main menu.... \n")
       case 5: 
+        taskManager.save()
         quit = True
       case _:
         print("Invalid number, write a number from 1 to 5")
